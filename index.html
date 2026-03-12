@@ -1018,6 +1018,48 @@
         background: var(--accent-soft);
       }
 
+      /* ─── SECTION CTA ROW ─── */
+      .section-cta {
+        margin-top: 48px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .section-cta-center { justify-content: center; text-align: center; }
+      .section-cta-note { font-size: 13px; color: var(--text-muted); }
+
+      /* ─── FLOATING STICKY BUTTON ─── */
+      .sticky-cta {
+        position: fixed;
+        bottom: 28px;
+        left: 50%;
+        transform: translateX(-50%) translateY(80px);
+        z-index: 300;
+        opacity: 0;
+        transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .sticky-cta.visible {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .sticky-cta a {
+        display: inline-flex; align-items: center; gap: 8px;
+        padding: 14px 28px; border-radius: 100px;
+        background: var(--accent); color: #fff;
+        font-size: 15px; font-weight: 700;
+        text-decoration: none; font-family: inherit;
+        box-shadow: 0 8px 28px rgba(194,65,12,0.38), 0 2px 8px rgba(0,0,0,0.1);
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+      .sticky-cta a:hover {
+        transform: scale(1.03);
+        box-shadow: 0 12px 36px rgba(194,65,12,0.45);
+      }
+
       /* ─── EMAIL FORM ─── */
       .email-form {
         display: flex;
@@ -1170,10 +1212,10 @@
             your style, your words.
           </p>
           <div class="hero-ctas">
-            <a href="#pricing" class="btn btn-accent">
+            <a href="#waitlist" class="btn btn-accent" style="font-size:16px;padding:14px 28px;border-radius:100px;">
               <svg
-                width="14"
-                height="14"
+                width="15"
+                height="15"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -1188,7 +1230,7 @@
                 />
                 <line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round" />
               </svg>
-              Get Early Access
+              Join the Waitlist
             </a>
             <a href="#how-it-works" class="btn btn-ghost">See how it works</a>
           </div>
@@ -1441,6 +1483,14 @@
       </div>
     </div>
 
+    <!-- ─── FLOATING CTA ─── -->
+    <div class="sticky-cta" id="sticky-cta">
+      <a href="#waitlist">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="9" y="1" width="6" height="14" rx="3"/><path d="M5 10a7 7 0 0 0 14 0" fill="none" stroke-linecap="round"/><line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round"/></svg>
+        Join the Waitlist
+      </a>
+    </div>
+
     <!-- ─── BRANDS STRIP ─── -->
     <div class="brands">
       <span class="brands-lbl">Works with</span>
@@ -1489,11 +1539,16 @@
             </p>
           </div>
         </div>
+        <div class="section-cta">
+          <a href="#waitlist" class="btn btn-accent" style="border-radius:100px;font-size:15px;padding:13px 26px;">Join the Waitlist</a>
+          <span class="section-cta-note">Free to join · No spam</span>
+        </div>
       </div>
     </div>
 
     <!-- ─── FEATURES ─── -->
     <div class="section features-bg" id="features">
+
       <div class="section-inner">
         <div class="section-chip">Features</div>
         <h2>Everything you need. <em>Nothing you don't.</em></h2>
@@ -1551,6 +1606,10 @@
               format. English, Spanish, French, and more supported.
             </p>
           </div>
+        </div>
+        <div class="section-cta">
+          <a href="#waitlist" class="btn btn-accent" style="border-radius:100px;font-size:15px;padding:13px 26px;">Join the Waitlist</a>
+          <span class="section-cta-note">$29.99 lifetime · No subscription</span>
         </div>
       </div>
     </div>
@@ -1675,7 +1734,7 @@
               <li>Folders &amp; search</li>
               <li>Bring your own API key</li>
             </ul>
-            <button class="plan-btn-outline">Download Free</button>
+            <a href="#waitlist" class="plan-btn-outline" style="display:block;text-align:center;text-decoration:none;">Join Waitlist — Free</a>
           </div>
           <div class="pcard pcard-featured">
             <div class="plan-label">Lifetime</div>
@@ -1694,7 +1753,7 @@
               <li>Append to existing notes</li>
               <li>All future updates</li>
             </ul>
-            <button class="plan-btn-white">Get Lifetime Access</button>
+            <a href="#waitlist" class="plan-btn-white" style="display:block;text-align:center;text-decoration:none;">Join Waitlist — $29.99</a>
           </div>
         </div>
 
@@ -1787,6 +1846,20 @@
         );
         wf.appendChild(bar);
       }
+
+      // Floating sticky button — show after scrolling past hero, hide near waitlist
+      (function () {
+        const sticky = document.getElementById("sticky-cta");
+        const hero   = document.querySelector(".hero-wrap");
+        const wl     = document.getElementById("waitlist");
+        function onScroll() {
+          const heroBottom = hero.getBoundingClientRect().bottom;
+          const wlTop      = wl.getBoundingClientRect().top;
+          const inView     = heroBottom < 0 && wlTop > window.innerHeight * 0.5;
+          sticky.classList.toggle("visible", inView);
+        }
+        window.addEventListener("scroll", onScroll, { passive: true });
+      })();
 
       // Waitlist form
       document.getElementById("waitlist-form").addEventListener("submit", async (e) => {
