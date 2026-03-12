@@ -83,8 +83,8 @@ app.post("/api/subscribe", subscribeLimiter, async (req, res) => {
     if (error.code === "23505") {
       return res.status(409).json({ error: "already_registered" });
     }
-    // Don't leak Supabase internals
-    console.error("[subscribe] db error:", error.code);
+    // Log full error server-side for debugging (never sent to client)
+    console.error("[subscribe] db error:", error.code, error.message, error.hint ?? "");
     return res.status(500).json({ error: "Failed to save" });
   }
 

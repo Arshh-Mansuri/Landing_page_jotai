@@ -162,6 +162,11 @@
         background: var(--accent);
         animation: pulse 2s ease-in-out infinite;
       }
+      @keyframes navPulse {
+        0%, 100% { box-shadow: 0 0 0 2px rgba(194,65,12,0.25), 0 4px 16px rgba(194,65,12,0.4); }
+        50%       { box-shadow: 0 0 0 4px rgba(194,65,12,0.15), 0 4px 24px rgba(194,65,12,0.55); }
+      }
+
       @keyframes pulse {
         0%,
         100% {
@@ -1191,8 +1196,8 @@
         <a
           href="#waitlist"
           class="btn btn-accent"
-          style="padding: 8px 18px; font-size: 13px"
-          >Get Early Access</a
+          style="padding: 10px 20px; font-size: 13px; font-weight: 700; letter-spacing: 0.1px; color: #fff; box-shadow: 0 0 0 2px rgba(194,65,12,0.25), 0 4px 16px rgba(194,65,12,0.4); animation: navPulse 2.5s ease-in-out infinite;"
+          >✦ Get Early Access</a
         >
       </div>
     </nav>
