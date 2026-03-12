@@ -1018,6 +1018,51 @@
         background: var(--accent-soft);
       }
 
+      /* ─── EMAIL FORM ─── */
+      .email-form {
+        display: flex;
+        gap: 0;
+        max-width: 440px;
+        margin: 0 auto 16px;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.12);
+      }
+      .email-input {
+        flex: 1;
+        padding: 14px 18px;
+        font-size: 15px;
+        font-family: inherit;
+        background: rgba(255,255,255,0.08);
+        border: none;
+        color: #fafaf9;
+        outline: none;
+      }
+      .email-input::placeholder { color: rgba(255,255,255,0.35); }
+      .email-input:focus { background: rgba(255,255,255,0.12); }
+      .email-submit {
+        padding: 14px 22px;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.15s;
+      }
+      .email-submit:hover { background: var(--accent-light); }
+      .email-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+      .email-msg {
+        font-size: 13px;
+        min-height: 20px;
+        text-align: center;
+        transition: opacity 0.2s;
+      }
+      .email-msg.success { color: #86efac; }
+      .email-msg.error   { color: #fca5a5; }
+
       /* ─── RESPONSIVE ─── */
       @media (max-width: 900px) {
         .hero-inner {
@@ -1102,7 +1147,7 @@
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
         <a
-          href="#pricing"
+          href="#waitlist"
           class="btn btn-accent"
           style="padding: 8px 18px; font-size: 13px"
           >Get Early Access</a
@@ -1661,60 +1706,28 @@
     </div>
 
     <!-- ─── FINAL CTA ─── -->
-    <div class="final-cta">
+    <div class="final-cta" id="waitlist">
       <div class="final-inner">
-        <div class="section-chip">Get started today</div>
+        <div class="section-chip">Join the waitlist</div>
         <h2>Stop forgetting what you said.</h2>
         <p>
-          Record it. Structure it. Use it. Jot It AI turns every voice memo into
-          something actually worth saving.
+          Be first to know when Jot It AI launches. No spam — just one email
+          when it's ready.
         </p>
-        <div
-          style="
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-          "
-        >
-          <a
-            href="#pricing"
-            class="btn btn-accent"
-            style="font-size: 15px; padding: 13px 28px"
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2.5"
-              stroke-linecap="round"
-            >
-              <rect x="9" y="1" width="6" height="14" rx="3" />
-              <path
-                d="M5 10a7 7 0 0 0 14 0"
-                fill="none"
-                stroke-linecap="round"
-              />
-              <line x1="12" y1="19" x2="12" y2="23" stroke-linecap="round" />
-            </svg>
-            Get Early Access — $29.99
-          </a>
-          <a
-            href="#how-it-works"
-            class="btn"
-            style="
-              background: rgba(255, 255, 255, 0.08);
-              color: #d6d3d1;
-              border: 1px solid rgba(255, 255, 255, 0.1);
-              font-size: 15px;
-              padding: 13px 28px;
-            "
-          >
-            See how it works
-          </a>
-        </div>
+        <form class="email-form" id="waitlist-form">
+          <input
+            class="email-input"
+            id="waitlist-email"
+            type="email"
+            placeholder="you@example.com"
+            required
+            autocomplete="email"
+          />
+          <button class="email-submit" id="waitlist-btn" type="submit">
+            Notify me
+          </button>
+        </form>
+        <p class="email-msg" id="waitlist-msg"></p>
       </div>
     </div>
 
@@ -1774,6 +1787,46 @@
         );
         wf.appendChild(bar);
       }
+
+      // Waitlist form
+      document.getElementById("waitlist-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("waitlist-email").value.trim();
+        const btn = document.getElementById("waitlist-btn");
+        const msg = document.getElementById("waitlist-msg");
+
+        btn.disabled = true;
+        btn.textContent = "Saving...";
+        msg.textContent = "";
+        msg.className = "email-msg";
+
+        try {
+          const res = await fetch("/api/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          });
+
+          if (res.ok) {
+            msg.textContent = "🎉 You're on the list! We'll let you know when we launch.";
+            msg.className = "email-msg success";
+            document.getElementById("waitlist-email").value = "";
+            btn.textContent = "Done!";
+          } else if (res.status === 409) {
+            msg.textContent = "You're already registered — we'll be in touch!";
+            msg.className = "email-msg success";
+            btn.disabled = false;
+            btn.textContent = "Notify me";
+          } else {
+            throw new Error();
+          }
+        } catch {
+          msg.textContent = "Something went wrong. Please try again.";
+          msg.className = "email-msg error";
+          btn.disabled = false;
+          btn.textContent = "Notify me";
+        }
+      });
 
       // Social share links
       const pageUrl = encodeURIComponent(window.location.href);
