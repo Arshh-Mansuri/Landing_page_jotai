@@ -6,6 +6,7 @@ const SCREENS = {
   RECORDING: "recording",
   POST_PROCESS: "post_process",
   NOTE: "note",
+  TODO: "todo",
   SETTINGS: "settings",
 };
 
@@ -54,6 +55,14 @@ const mockNotes = [
   },
 ];
 
+const mockTodos = [
+  { id: 1, task: "Record demo video", due: "Thursday", note: "Product launch ideas" },
+  { id: 2, task: "Set up LemonSqueezy payment page", due: null, note: "Product launch ideas" },
+  { id: 3, task: "Draft Product Hunt listing", due: null, note: "Product launch ideas" },
+  { id: 4, task: "Prepare 3 Twitter threads for launch week", due: null, note: "Product launch ideas" },
+  { id: 5, task: "Review onboarding flow — keep to 2 screens", due: null, note: "Meeting — design sync" },
+];
+
 const structuredNote = {
   title: "Product launch ideas",
   summary: "Planning the launch sequence for Jot It AI, focusing on early adopter acquisition through a limited-time discount and email-driven engagement.",
@@ -86,6 +95,10 @@ export default function JotItAI() {
   const [screen, setScreen] = useState(SCREENS.HOME);
   const [selectedStyle, setSelectedStyle] = useState("clean");
   const [rewriteLevel, setRewriteLevel] = useState(2);
+  const [todos, setTodos] = useState(mockTodos.map((t) => ({ ...t, done: t.id === 2 })));
+
+  const toggleTodo = (id) =>
+    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
 
   const StatusBar = ({ dark }) => (
     <div style={{
@@ -613,6 +626,97 @@ export default function JotItAI() {
     </PhoneFrame>
   );
 
+  // ========== TODO ==========
+  const TodoScreen = () => {
+    const done = todos.filter((t) => t.done).length;
+    return (
+      <PhoneFrame>
+        <div style={{ height: "calc(100% - 50px)", display: "flex", flexDirection: "column" }}>
+          <div style={{ padding: "8px 22px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              <BackButton onClick={() => setScreen(SCREENS.HOME)} />
+              <h1 style={{ color: C.text, fontSize: 20, fontWeight: 700, margin: 0, fontFamily: "'Georgia', serif" }}>Tasks</h1>
+            </div>
+            <span style={{ color: C.textMuted, fontSize: 12, fontFamily: "system-ui" }}>{done}/{todos.length} done</span>
+          </div>
+
+          {/* AI banner */}
+          <div style={{
+            margin: "0 22px 16px", padding: "10px 14px", borderRadius: 10,
+            background: C.accentSoft, border: `1px solid ${C.accentBorder}`,
+            display: "flex", alignItems: "center", gap: 8,
+          }}>
+            <span style={{ fontSize: 14 }}>✨</span>
+            <span style={{ color: C.accent, fontSize: 12, fontFamily: "system-ui", fontWeight: 500 }}>
+              AI extracted {todos.length} tasks from your notes
+            </span>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ margin: "0 22px 20px", height: 4, background: "rgba(194,65,12,0.1)", borderRadius: 4, overflow: "hidden" }}>
+            <div style={{ width: `${(done / todos.length) * 100}%`, height: "100%", background: C.accent, borderRadius: 4, transition: "width 0.3s" }} />
+          </div>
+
+          <div style={{ flex: 1, overflowY: "auto", padding: "0 22px" }}>
+            {["Pending", "Completed"].map((group) => {
+              const items = todos.filter((t) => group === "Pending" ? !t.done : t.done);
+              if (!items.length) return null;
+              return (
+                <div key={group} style={{ marginBottom: 20 }}>
+                  <span style={{ color: C.textMuted, fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1.2px", display: "block", marginBottom: 8, fontFamily: "system-ui" }}>{group}</span>
+                  {items.map((todo) => (
+                    <button
+                      key={todo.id}
+                      onClick={() => toggleTodo(todo.id)}
+                      style={{
+                        width: "100%", textAlign: "left", cursor: "pointer",
+                        background: C.bgCard, border: `1px solid ${C.borderLight}`,
+                        borderRadius: 12, padding: "13px 14px", marginBottom: 7,
+                        display: "flex", alignItems: "flex-start", gap: 12,
+                      }}
+                    >
+                      {/* Checkbox */}
+                      <div style={{
+                        width: 20, height: 20, borderRadius: 6, flexShrink: 0, marginTop: 1,
+                        background: todo.done ? C.accent : "transparent",
+                        border: `1.5px solid ${todo.done ? C.accent : "rgba(28,25,23,0.2)"}`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
+                        {todo.done && (
+                          <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
+                            <path d="M2 6l3 3 5-5" />
+                          </svg>
+                        )}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <span style={{
+                          color: todo.done ? C.textMuted : C.text,
+                          fontSize: 14, fontFamily: "system-ui", lineHeight: 1.4,
+                          textDecoration: todo.done ? "line-through" : "none",
+                          display: "block", marginBottom: 4,
+                        }}>{todo.task}</span>
+                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                          <span style={{
+                            fontSize: 10, fontWeight: 600, padding: "2px 7px", borderRadius: 4,
+                            background: C.accentBg, color: C.accent, fontFamily: "system-ui",
+                          }}>{todo.note}</span>
+                          {todo.due && (
+                            <span style={{ color: C.textMuted, fontSize: 11, fontFamily: "system-ui" }}>Due {todo.due}</span>
+                          )}
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
+            <div style={{ height: 30 }} />
+          </div>
+        </div>
+      </PhoneFrame>
+    );
+  };
+
   // ========== SETTINGS ==========
   const SettingsScreen = () => (
     <PhoneFrame>
@@ -637,7 +741,7 @@ export default function JotItAI() {
                 background: C.accent, border: "none", borderRadius: 8,
                 padding: "8px 14px", color: "#fff", fontSize: 12,
                 fontWeight: 600, cursor: "pointer", fontFamily: "system-ui",
-              }}>$29.99 Lifetime</button>
+              }}>$29.99/yr</button>
             </div>
             <div style={{ height: 3, background: "rgba(194,65,12,0.1)", borderRadius: 3, overflow: "hidden" }}>
               <div style={{ width: "60%", height: "100%", background: C.accent, borderRadius: 3 }} />
@@ -645,10 +749,10 @@ export default function JotItAI() {
           </div>
 
           {/* API */}
-          <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px", display: "block", marginBottom: 10, fontFamily: "system-ui" }}>API Key</span>
+          <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "1px", display: "block", marginBottom: 10, fontFamily: "system-ui" }}>API Keys</span>
 
           <div style={{
-            padding: "14px 16px", borderRadius: 12, marginBottom: 8,
+            padding: "14px 16px", borderRadius: 12, marginBottom: 6,
             background: C.bgCard, border: `1px solid ${C.border}`,
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
@@ -663,6 +767,23 @@ export default function JotItAI() {
               fontFamily: "monospace", fontSize: 12, color: C.textMuted,
             }}>sk-proj-••••••••••••••LmT3</div>
           </div>
+
+          {[
+            { label: "Claude (Anthropic)", placeholder: "sk-ant-••••••••••••••" },
+            { label: "Grok (xAI)", placeholder: "xai-••••••••••••••" },
+          ].map((api) => (
+            <div key={api.label} style={{
+              padding: "13px 16px", borderRadius: 12, marginBottom: 6,
+              background: C.bgCard, border: `1px solid ${C.border}`,
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+            }}>
+              <span style={{ color: C.text, fontSize: 13, fontFamily: "system-ui" }}>{api.label}</span>
+              <span style={{
+                fontSize: 10, padding: "2px 8px", borderRadius: 4,
+                background: C.accentBg, color: C.accent, fontWeight: 600, fontFamily: "system-ui",
+              }}>Add Key</span>
+            </div>
+          ))}
 
           <div style={{
             padding: "13px 16px", borderRadius: 12, marginBottom: 22,
@@ -725,6 +846,7 @@ export default function JotItAI() {
           { key: SCREENS.RECORDING, label: "Record" },
           { key: SCREENS.POST_PROCESS, label: "Process" },
           { key: SCREENS.NOTE, label: "Note" },
+          { key: SCREENS.TODO, label: "Tasks" },
           { key: SCREENS.SETTINGS, label: "Settings" },
         ].map(({ key, label }) => (
           <button key={key} onClick={() => setScreen(key)} style={{
@@ -741,6 +863,7 @@ export default function JotItAI() {
       {screen === SCREENS.RECORDING && <RecordingScreen />}
       {screen === SCREENS.POST_PROCESS && <PostProcessScreen />}
       {screen === SCREENS.NOTE && <NoteScreen />}
+      {screen === SCREENS.TODO && <TodoScreen />}
       {screen === SCREENS.SETTINGS && <SettingsScreen />}
     </div>
   );
