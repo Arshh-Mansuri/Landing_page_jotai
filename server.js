@@ -24,7 +24,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],  // inline styles in HTML (intentional)
+        styleSrc: ["'self'"],
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:"],
         connectSrc: ["'self'"],
